@@ -34,7 +34,7 @@ public class TodayQuizService {
     private final MailLogRepository mailLogRepository;
     private final SesMailService mailService;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Quiz getTodayQuizBySubscription(Subscription subscription) {
         // 1. 구독자 정보 및 카테고리 조회
         Long parentCategoryId = subscription.getCategory().getId(); // 대분류 ID
@@ -55,6 +55,10 @@ public class TodayQuizService {
                 ? QuizFormatType.SUBJECTIVE
                 : QuizFormatType.MULTIPLE_CHOICE;
 
+        QuizFormatType alterType = isEssayDay
+            ? QuizFormatType.MULTIPLE_CHOICE
+            : QuizFormatType.SUBJECTIVE;
+
         // 3. 정답률 기반 난이도 바운더리 설정
         List<QuizLevel> allowedDifficulties = getAllowedDifficulties(accuracy);
 
@@ -64,7 +68,7 @@ public class TodayQuizService {
 
         // 7. 필터링 조건으로 문제 조회(대분류, 난이도, 내가푼문제 제외, 제외할 카테고리 제외하고, 문제 타입 전부 조건으로)
 
-        Quiz todayQuiz = quizRepository.findAvailableQuizzesUnderParentCategory(
+       /* Quiz todayQuiz = quizRepository.findAvailableQuizzesUnderParentCategory(
                 parentCategoryId,
                 allowedDifficulties,
                 sentQuizIds,
@@ -82,8 +86,17 @@ public class TodayQuizService {
                     targetType,
                     0
             );
-        }
+        }*/
+
+        int[] offsetsToTry = (offset > 0) ? new int[]{offset, 0} : new int[]{0};
+        QuizFormatType[] typesToTry = new QuizFormatType[]{targetType, alterType};
+
+        Quiz todayQuiz = tryFindQuiz(
+            parentCategoryId, allowedDifficulties, sentQuizIds, typesToTry, offsetsToTry
+        );
+
         if (todayQuiz == null) {
+            log.info("subscription_id {} - 문제 출제 실패, targetType {}", subscriptionId, targetType);
             throw new QuizException(QuizExceptionCode.QUIZ_VALIDATION_FAILED_ERROR);
         }
 
@@ -101,6 +114,22 @@ public class TodayQuizService {
         } else { //난이도 상
             return List.of(QuizLevel.EASY, QuizLevel.NORMAL, QuizLevel.HARD);
         }
+    }
+
+    private Quiz tryFindQuiz(Long parentCategoryId,
+        List<QuizLevel> difficulties,
+        Set<Long> sentQuizIds,
+        QuizFormatType[] types,
+        int[] offsets) {
+        for (QuizFormatType type : types) {
+            for (int off : offsets) {
+                Quiz q = quizRepository.findAvailableQuizzesUnderParentCategory(
+                    parentCategoryId, difficulties, sentQuizIds, type, off
+                );
+                if (q != null) return q;
+            }
+        }
+        return null;
     }
 
 //    private double calculateAccuracy(List<UserQuizAnswer> answers) {

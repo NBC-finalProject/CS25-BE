@@ -33,6 +33,12 @@ dependencies {
     implementation "org.springframework.ai:spring-ai-starter-mcp-client:1.0.0"
     implementation "org.springframework.ai:spring-ai-starter-mcp-client-webflux:1.0.0"
 
+    // resilience4j
+    implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.3.0'
+    implementation 'io.github.resilience4j:resilience4j-circuitbreaker:2.3.0'
+    implementation 'io.github.resilience4j:resilience4j-retry:2.3.0'
+    implementation 'io.github.resilience4j:resilience4j-reactor:2.3.0'
+
     //JavaMailSender
     implementation 'jakarta.mail:jakarta.mail-api:2.1.0'
 

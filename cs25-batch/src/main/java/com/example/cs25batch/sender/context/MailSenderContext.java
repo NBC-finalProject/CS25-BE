@@ -4,7 +4,6 @@ import com.example.cs25batch.batch.dto.MailDto;
 import com.example.cs25batch.sender.MailSenderStrategy;
 import java.util.Map;
 
-import io.github.bucket4j.Bucket;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -18,9 +17,9 @@ public class MailSenderContext {
         strategy.sendQuizMail(dto);
     }
 
-    public Bucket getBucket(String strategyKey) {
+    public boolean tryConsume(String strategyKey, Long num) {
         MailSenderStrategy strategy = getValidStrategy(strategyKey);
-        return strategy.getBucket();
+        return strategy.tryConsume(num);
     }
 
     private MailSenderStrategy getValidStrategy(String strategyKey) {
