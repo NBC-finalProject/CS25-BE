@@ -2,15 +2,9 @@ package com.example.cs25batch.batch.component.reader;
 
 import com.example.cs25batch.adapter.RedisStreamsClient;
 import com.example.cs25batch.sender.context.MailSenderContext;
-import io.github.bucket4j.Bucket;
-import io.github.bucket4j.ConsumptionProbe;
 import java.time.Duration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemReader;
