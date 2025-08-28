@@ -71,6 +71,9 @@ public class MailLogAspect {
                 );
                 redisClient.addDlq("quiz-email-retry-stream", retryMessage);
             }
+            else if (status == MailStatus.SENT){
+                mailLogBatchService.saveSuccessLog(subscription, quiz, LocalDateTime.now());
+            }
         }
     }
 }
