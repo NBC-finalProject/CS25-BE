@@ -72,7 +72,12 @@ public class MailLogAspect {
                 redisClient.addDlq("quiz-email-retry-stream", retryMessage);
             }
             else if (status == MailStatus.SENT){
-                mailLogBatchService.saveSuccessLog(subscription, quiz, LocalDateTime.now());
+                try {
+                    mailLogBatchService.saveSuccessLog(subscription, quiz, LocalDateTime.now());
+                } catch (Exception logEx) {
+                    log.warn("메일 성공 로그 저장 실패: subId={}, quizId={}",
+                        subscription.getId(), quiz.getId(), logEx);
+                }
             }
         }
     }
