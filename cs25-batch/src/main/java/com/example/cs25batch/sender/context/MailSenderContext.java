@@ -30,4 +30,8 @@ public class MailSenderContext {
         return strategy;
     }
 
+    public void acquirePermitOrWait(String strategyKey) {
+        MailSenderStrategy strategy = getValidStrategy(strategyKey);
+        strategy.acquirePermitOrWait();
+    }
 }

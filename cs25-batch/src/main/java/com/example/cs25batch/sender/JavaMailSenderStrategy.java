@@ -4,6 +4,10 @@ import com.example.cs25batch.batch.dto.MailDto;
 import com.example.cs25batch.batch.service.JavaMailService;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
+import io.github.bucket4j.ConsumptionProbe;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +21,7 @@ public class JavaMailSenderStrategy implements MailSenderStrategy{
             .addLimit(
                     Bandwidth.builder()
                             .capacity(4)
-                            .refillGreedy(4, Duration.ofMillis(1000))
+                            .refillGreedy(2, Duration.ofMillis(500))
                             .build()
             )
             .build();
@@ -30,5 +34,19 @@ public class JavaMailSenderStrategy implements MailSenderStrategy{
     @Override
     public boolean tryConsume(Long num){
         return bucket.tryConsume(num);
+    }
+
+    @Override
+    public void acquirePermitOrWait(){
+        while (true) {
+            ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
+            if (probe.isConsumed()) return;
+
+            long nanos = probe.getNanosToWaitForRefill();
+            long jitter = TimeUnit.MILLISECONDS.toNanos(
+                ThreadLocalRandom.current().nextInt(0, 50)
+            );
+            LockSupport.parkNanos(Math.min(nanos + jitter, TimeUnit.SECONDS.toNanos(1)));
+        }
     }
 }

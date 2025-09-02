@@ -2,22 +2,14 @@ package com.example.cs25batch.batch.component.reader;
 
 import com.example.cs25batch.adapter.RedisStreamsClient;
 import com.example.cs25batch.sender.context.MailSenderContext;
-import io.github.bucket4j.Bucket;
 import java.time.Duration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemReader;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.connection.stream.Consumer;
 import org.springframework.data.redis.connection.stream.MapRecord;
-import org.springframework.data.redis.connection.stream.ReadOffset;
-import org.springframework.data.redis.connection.stream.StreamOffset;
-import org.springframework.data.redis.connection.stream.StreamReadOptions;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -35,9 +27,12 @@ public class RedisStreamReader implements ItemReader<Map<String, String>> {
     public Map<String, String> read() throws InterruptedException {
         //long start = System.currentTimeMillis();
 
+/*
         while (!mailSenderContext.tryConsume(strategyKey, 1L)) {
             Thread.sleep(200); //토큰을 얻을 때까지 간격을 두고 재시도
         }
+*/
+        mailSenderContext.acquirePermitOrWait(strategyKey);
 
         MapRecord<String, Object, Object> msg = redisClient.readWithConsumerGroup(Duration.ofMillis(500));
         //redisTemplate.opsForStream().acknowledge(STREAM, GROUP, msg.getId());
