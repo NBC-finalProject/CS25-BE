@@ -8,6 +8,8 @@ import com.example.cs25service.domain.quiz.dto.QuizCategoryResponseDto;
 import com.example.cs25service.domain.quiz.dto.TodayQuizResponseDto;
 import java.util.Arrays;
 import java.util.List;
+
+import com.example.cs25service.domain.quiz.util.AesUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class QuizPageService {
 
     private final QuizRepository quizRepository;
-
+    private final AesUtil aesUtil;
     /**
      * 오늘의 문제를 반환해주는 메서드
      * @param quizId 문제 id
@@ -56,8 +58,8 @@ public class QuizPageService {
             .choice2(choices.get(1))
             .choice3(choices.get(2))
             .choice4(choices.get(3))
-            .answerNumber(answerNumber)
-            .commentary(quiz.getCommentary())
+            .answerNumber(aesUtil.encrypt(answerNumber))
+            .commentary(aesUtil.encrypt(quiz.getCommentary()))
             .quizType(quiz.getType().name())
             .quizLevel(quiz.getLevel().name())
             .category(getQuizCategory(quiz))
@@ -74,8 +76,8 @@ public class QuizPageService {
         return TodayQuizResponseDto.builder()
             .question(quiz.getQuestion())
             .quizType(quiz.getQuestion())
-            .answer(quiz.getAnswer())
-            .commentary(quiz.getCommentary())
+            .answer(aesUtil.encrypt(quiz.getAnswer()))
+            .commentary(aesUtil.encrypt(quiz.getCommentary()))
             .quizType(quiz.getType().name())
             .quizLevel(quiz.getLevel().name())
             .category(getQuizCategory(quiz))
