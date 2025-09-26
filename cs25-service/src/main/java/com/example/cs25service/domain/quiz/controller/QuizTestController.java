@@ -1,9 +1,13 @@
 package com.example.cs25service.domain.quiz.controller;
 
 import com.example.cs25common.global.dto.ApiResponse;
+import com.example.cs25service.domain.quiz.dto.TodayQuizResponseDto;
 import com.example.cs25service.domain.quiz.service.QuizAccuracyCalculateService;
+import com.example.cs25service.domain.quiz.service.QuizPageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -11,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class QuizTestController {
 
     private final QuizAccuracyCalculateService accuracyService;
+    private final QuizPageService quizPageService;
 
     @GetMapping("/accuracyTest")
     public ApiResponse<Void> accuracyTest() {
@@ -25,6 +30,17 @@ public class QuizTestController {
 //    ) {
 //        accuracyService.getTodayQuizBySubscription(subscriptionId);
 //        return new ApiResponse<>(200);
+//    }
+
+//    @GetMapping("/test/todayQuiz")
+//    public ApiResponse<TodayQuizResponseDto> showTodayQuizPage(
+//            @RequestParam("quizId") String quizId
+//    ) {
+//
+//        return new ApiResponse<>(
+//                200,
+//                quizPageService.showTodayQuizPage(quizId)
+//        );
 //    }
 
 //    @GetMapping("/test/sse")
