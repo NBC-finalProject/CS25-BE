@@ -2,11 +2,13 @@ package com.example.cs25batch.batch.component.processor;
 
 import com.example.cs25batch.adapter.RedisStreamsClient;
 import com.example.cs25batch.batch.dto.MailDto;
+import com.example.cs25batch.batch.service.MailLogBatchService;
 import com.example.cs25batch.batch.service.TodayQuizService;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
 import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
+import java.time.LocalDateTime;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +23,7 @@ public class MailConsumerAsyncProcessor implements ItemProcessor<Map<String, Str
     private final SubscriptionRepository subscriptionRepository;
     private final TodayQuizService todayQuizService;
     private final RedisStreamsClient redisClient;
+    private final MailLogBatchService mailLogBatchService;
 
     @Override
     public MailDto process(Map<String, String> message) throws Exception {
@@ -49,6 +52,7 @@ public class MailConsumerAsyncProcessor implements ItemProcessor<Map<String, Str
                 .build();
         } catch(QuizException e){
             //문제 출제 실패로 인한 예외 발생 시, 기존 Queue에 있는 데이터 삭제
+            mailLogBatchService.saveFailLog(subscription, null, LocalDateTime.now(), "No quizzes available");
             redisClient.ackAndDel(recordId);
             return null;
         }
